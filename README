@@ -1,16 +1,18 @@
 MacSer is a tool developed to change easily your MAC Address .
 Options are:
 
-  -h, --help            show this help message and exit
+-h, --help            show this help message and exit
   -r, --random          Generate random MAC Address .
   -m SPECIFIC, --mac=SPECIFIC
                         Specific MAC Address .
   -o, --info            Mac address INFO .
   -i INTERFACE, --interface=INTERFACE
                         Internet Interface .
+  -g, --gtk 
 
 Example:
 
 sudo python -c -r -i eth0
+sudo python -m 00:16:3e:11:d9:95 -i eth0
 
-Or use GUI .
+Or use GUI with -g parameter .
