@@ -4,9 +4,7 @@
 #
 #       MacSer
 #       
-#       Copyright 2011 Luca Gagliardi <systemoveride@live.it>
-#       http://systemoveride.net
-#       http://backbox.org
+#       Copyright 2011 Luca Gagliardi <system_overide@live.it> <http://systemoveride.net>
 #       
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -32,12 +30,20 @@ import os
 import random
 import time
 import sys
-import pygtk
-pygtk.require("2.0")
-import gtk
-import gtk.glade
 import re
 
+try:  
+	import pygtk  
+	pygtk.require("2.0")  
+except:  
+	pass  
+try:  
+	import gtk  
+	import gtk.glade  
+except:  
+	print("GTK Not Availible")
+	sys.exit(1)
+	
 class color:
     PINK = '\033[95m'
     BLUE = '\033[94m'
@@ -60,8 +66,6 @@ def yellow(word):
 	
 def red(word):
 	return color.RED + word + color.END
-	
-
 
 class Service():
     def __init__(self):
@@ -145,92 +149,67 @@ class Service():
 				print red("[!] No interface "+interface+" found")
 				sys.exit(0)
 
-				
 class MacSer(Service):
 
 	def __init__(self):
+			self.gladefile = "graphic.glade"  
+			self.root = gtk.glade.XML(self.gladefile) 
+			self.w_main = self.root.get_widget("window1")
+			self.w_main.connect("destroy", gtk.main_quit)
 			
-		self.gladefile = "guis.glade"  
-	        self.root = gtk.glade.XML(self.gladefile) 
-	        self.w_main = self.root.get_widget("window1")
-	        self.w_main.connect("destroy", gtk.main_quit)
+			dic = { "on_MacChangeButton_clicked" : self.macchangebuttons_clicked,
+					"on_ChoseBox_changed" : self.choseboxs_changed,
+					"on_GetInformationButton_clicked" : self.getinformationbuttons_clicked,
+					"on_UpdateButton_clicked" : self.updatebuttons_clicked,
+					"on_CreditsButton_clicked" : self.creditsbuttons_clicked,
+					"on_QuitButton_clicked" : self.quitbuttons_clicked,
+					"on_MainWindow_destroy" : gtk.main_quit }
+			self.root.signal_autoconnect(dic)
 		
-		dic = { "on_button1_clicked_change_mac" : self.button1_clicked,
-				 "combobox1_changed" : self.combobox1_changed,
-				 "on_button2_clicked" : self.button2_clicked,
-				 "on_button3_clicked" : self.button3_clicked,
-				 "on_button4_clicked" : self.button4_clicked,
-				"on_MainWindow_destroy" : gtk.main_quit }
-		self.root.signal_autoconnect(dic)
+			self.eInterface = self.root.get_widget("InterfaceEntry")
+			self.eMac = self.root.get_widget("MacEntry")
+			self.lMacoutput = self.root.get_widget('MacOutputLabel')
+			self.cChosebox=self.root.get_widget("ChoseBox")
 		
-		self.entry1 = self.root.get_widget("entry1")
-		self.entry2 = self.root.get_widget("entry2")
-		self.label = self.root.get_widget('mac')
-		self.combobox1=self.root.get_widget("combobox1")
-
-		self.ModeChose = gtk.ListStore(str)
-		self.ModeChose.append(['MAC'])
-		self.ModeChose.append(['Random'])
-		self.combobox1.set_model(self.ModeChose)
-		
-		self.active = self.combobox1.get_active()
-
-		
-		self.w_main.show_all()
-		
+			self.w_main.show_all()
 		
 
-	def button1_clicked(self, widget):
+	def macchangebuttons_clicked(self, widget):
 		
-		self.interface = self.entry2.get_text()
+		self.interface = self.eInterface.get_text()
 		
 		self.gdevice(self.interface)
 		
-		if self.entry1.get_property('visible') == True:
-			self.mac = self.entry1.get_text()
+		if self.eMac.get_property('visible') == True:
+			self.mac = self.eMac.get_text()
 			self.gmacvalidate(self.mac)
 			try:
 				self.change(self.interface,self.mac)
-				self.label.set_text("New MAC Address: "+self.mac)
+				self.lMacoutput.set_text("New MAC Address: "+self.mac)
 			except:
-				self.label.set_text("Error")
+				self.lMacoutput.set_text("Error")
 				exit(0)
 			
 		else:
 			self.mac = self.random()
 			self.change(self.interface,self.mac)
 			self.look = os.popen('cat /sys/class/net/'+self.interface+'/address')
-			self.label.set_text("New MAC Address: "+str(self.look.read()))
+			self.lMacoutput.set_text("New MAC Address: "+str(self.look.read()))
 			
 		
 
-	def combobox1_changed(self, widget):
-		self.active = self.combobox1.get_active()
+	def choseboxs_changed(self, widget):
+		self.active = self.cChosebox.get_active()
 		if self.active == 1:
 			print self.active
-			self.entry1.hide()
+			self.eMac.hide()
 		elif self.active != 1:
-			self.entry1.show()
+			self.eMac.show()
+			
 		
-			
-	def button2_clicked(self, widget):
-		gtk.main_quit()
-			
-			
-	def button3_clicked(self, widget):
-		self.about = gtk.AboutDialog()
-		self.about = gtk.AboutDialog()
-		self.about.set_program_name("MacSer")
-		self.about.set_version("1.2")
-		self.about.set_comments("MacSer Change you Mac Address")
-		self.about.set_copyright("(System_Overide)")
-		self.about.set_website("http://backbox.org")
-		self.about.run()
-		self.about.destroy()
-		
-	def button4_clicked(self, widget):
+	def getinformationbuttons_clicked(self, widget):
 							
-		self.interface = self.entry2.get_text()
+		self.interface = self.eInterface.get_text()
 		
 		self.gdevice(self.interface)
 		
@@ -269,6 +248,10 @@ class MacSer(Service):
 		self.window.show()
 		self.textview1.show()
 		
+	def updatebuttons_clicked(self, widget):
+		os.system("wget -O mac-database.txt http://standards.ieee.org/regauth/oui/oui.txt")
+		self.lMacoutput.set_text("Mac database updated !")
+		
 	def gdevice(self,interface):
 		self.lt = []
 		
@@ -290,8 +273,23 @@ class MacSer(Service):
 			self.dialog.set_default_response(gtk.RESPONSE_OK)
 			self.dialog.connect('response', self.dialog.destroy())
 			sys.exit(0)
-
-
+			
+			
+	def creditsbuttons_clicked(self, widget):
+		self.about = gtk.AboutDialog()
+		self.about = gtk.AboutDialog()
+		self.about.set_program_name("MacSer")
+		self.about.set_version("1.2")
+		self.about.set_comments("MacSer Change you Mac Address")
+		self.about.set_copyright("(System_Overide)")
+		self.about.set_website("http://systemoveride.net")
+		self.about.run()
+		self.about.destroy()
+		
+	def quitbuttons_clicked(self, widget):
+		gtk.main_quit()
+		
+		
 parser = OptionParser( usage = "usage: %prog [options]" )
 
 parser.add_option( "-r", "--random", action="store_true", dest="random", default=False, help="Generate random MAC Address ." );
@@ -335,4 +333,5 @@ elif o.gtk:
 
 else:
 	print parser.print_help()
+
 
