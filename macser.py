@@ -97,6 +97,10 @@ class Service():
 			print red("[X] Error")
 			exit(0)
 			
+    def update(self):
+		os.system("wget -O mac-database.txt http://standards.ieee.org/regauth/oui/oui.txt")
+		print green("Mac List Updated!")
+			
 
     def findmac(self,interface):
 		self.device(interface)
@@ -140,10 +144,8 @@ class Service():
 		
     def device(self,interface):
 		self.lt = []
-		
 		for i in os.listdir('/sys/class/net/'):
 			self.lt.append(i)
-			
 		for y in self.lt:
 			if not interface in self.lt:
 				print red("[!] No interface "+interface+" found")
@@ -249,7 +251,7 @@ class MacSer(Service):
 		self.textview1.show()
 		
 	def updatebuttons_clicked(self, widget):
-		os.system("wget -O mac-database.txt http://standards.ieee.org/regauth/oui/oui.txt")
+		self.update()
 		self.lMacoutput.set_text("Mac database updated !")
 		
 	def gdevice(self,interface):
@@ -295,6 +297,7 @@ parser = OptionParser( usage = "usage: %prog [options]" )
 parser.add_option( "-r", "--random", action="store_true", dest="random", default=False, help="Generate random MAC Address ." );
 parser.add_option( "-m", "--mac", action="store", dest="specific", default=None, help="Specific MAC Address ." );
 parser.add_option( "-o", "--info", action="store_true", dest="info", default=None, help="Mac address INFO ." );
+parser.add_option( "-u", "--update", action="store_true", dest="update", default=None, help="Update Mac List ." );
 parser.add_option( "-i", "--interface", action="store", dest="interface", default=None, help="Internet Interface ." );
 parser.add_option( "-g", "--gtk", action="store_true", dest="gtk", default=None, help="Run with GUI ." );
 
@@ -326,6 +329,9 @@ elif o.info:
 		sys.exit(0)
 	else:
 		Service.findmac(o.interface)
+
+elif o.update:
+	Service.update()
 		
 elif o.gtk:
 	macser = MacSer()
@@ -333,5 +339,3 @@ elif o.gtk:
 
 else:
 	print parser.print_help()
-
-
