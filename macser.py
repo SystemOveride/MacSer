@@ -281,7 +281,7 @@ class MacSer(Service):
 		self.about = gtk.AboutDialog()
 		self.about = gtk.AboutDialog()
 		self.about.set_program_name("MacSer")
-		self.about.set_version("1.2")
+		self.about.set_version("1.3")
 		self.about.set_comments("MacSer Change your Mac Address")
 		self.about.set_copyright("(System_Overide)")
 		self.about.set_website("http://systemoveride.net")
